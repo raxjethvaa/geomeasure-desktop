@@ -1,0 +1,35 @@
+.gmnoprint span, .gmnoprint a,.gm-style-cc{
+    display: none !important;
+}
+.gm-style div {
+    cursor: default !important;
+}
+/* .gm-style .gm-style-iw-c {
+    top: 70px !important;
+    left: 50px !important;
+    padding: 0px !important;
+}
+.gm-style-iw-d {
+    overflow: unset !important;
+}
+.gm-ui-hover-effect {
+    display: none !important;
+}
+.gm-style .gm-style-iw-t::after {
+    background: transparent !important;
+    box-shadow: none !important;
+} */
+.vertex-menu {
+    width: 75px;
+    position: absolute;
+    margin-left: 10px;
+    margin-top: -15px;
+}
+.vertex-menu button {
+    font-size: 12px;
+    width: 100%;
+    padding: 5px 0px;
+}
+body{
+    height: 100%;
+}

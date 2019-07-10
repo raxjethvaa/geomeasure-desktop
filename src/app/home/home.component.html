@@ -1,0 +1,853 @@
+<div class="container-fluid">
+    <div class="row navigation">
+        <div class="topnav">
+            <li class="logo">
+                <!-- <span class="newnavbar" (click)="openNav()">&#9776;</span> -->
+                <img src="assets/icons/logo_gmcav2trans.png" alt="geomeasure" class="ic_logo">
+                <span class="log"><h3>Geomeasure</h3> <span>Measure your fields</span></span>
+            </li>
+            <li class="select">
+                <input  type="text" id="totalMeter" class="width-dynamic" placeholder="Distance is: 0.00">
+                <button  class="btn calc-copy fa fa-clone" data-toggle="popover" data-placement="right"  data-content="Copied to clipboard"></button>
+            </li>
+            <div class="topnav-right">
+                <li class="searchbar">
+                    <label class="expandSearch">
+                        <input type="text" id="searchPlace" class="form-control">
+                        <i class="material-icons">search</i>
+                    </label>
+                </li>
+                <li class="login">
+                    <div *ngIf="!suclogin">
+                        <a data-toggle="modal" data-target="#login" class="nav-link cursor">Login</a>
+                    </div>
+                    <div *ngIf="suclogin">
+                            <a class="nav-ico cursor" (click)="logout()"><img src="assets/icons/logout.png" alt="logout.png"></a>
+                        <!-- <a class="nav-link cursor" (click)="logout()">Logout</a> -->
+                    </div>
+                </li>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="canvas">
+                <img src="assets/icons/splash.png" alt="geomeasure" class="splash">
+            </div>
+            <div id="map" class="canvas"></div>
+        </div>
+    </div>
+    <!-- <div class="row adfooter">
+        <div class="col-md-12"> -->
+            <!-- <ng-adsense [display]="'inline-block'"[width]="320" [height]="108"></ng-adsense> -->
+            <!-- <ng2-adsense [display]="'inline-block'"[width]="620" [height]="30" ></ng2-adsense>
+        </div>
+    </div> -->
+</div>
+<!-- <div id="mySidenav" class="sidenav">
+    <a><img src="assets/icons/splashtop.png" alt="geomeasure" class="sidabarlogo"></a>
+    <a class="fa fa-list-ul menu" data-toggle="modal" data-target="#allMeasure" (click)="closeNav()"> Saved measure</a>
+    <a class="fa fa-question menu" data-toggle="modal" data-target="#helpview" (click)="closeNav()"> Help</a>
+    <a class="fa fa-globe menu" data-toggle="modal" data-target="#upload" (click)="closeNav()"> Import KML</a>
+    <a class="fa fa-gear menu" data-toggle="modal" data-target="#setting" (click)="closeNav()"> Setting</a>
+    <a class="owner"><span>Powered By BMAC INFOTECH</span></a>
+</div> -->
+      
+<div class="row">
+    <div class="sidebar-menu">
+        <ul>
+            <li class="home d-grid cursor">
+                <i class="fa fa-home" (click)="home()" aria-hidden="true"></i>
+                <label>Home</label>
+            </li>
+            <li class="cursor d-grid" data-toggle="modal" data-target="#distance">
+                <img src='assets/icons/ic_action_distance.png' alt='ic_action_distance.png'>
+                <label>Distance</label>
+            </li>
+            <li class="cursor d-grid" data-toggle="modal" data-target="#area">
+                <img src='assets/icons/ic_action_area.png' alt='ic_action_area.png'>
+                <label>Area</label>
+            </li>
+            <li class="cursor d-grid" data-toggle="modal" data-target="#poi">
+                <img src='assets/icons/ic_action_poi.png' alt='ic_action_poi.png'>
+                <label>Location</label>
+            </li>
+            <li class="undo d-grid cursor" (click)="removeLastPoint()">
+                <i class="fa fa-undo" aria-hidden="true"></i>
+                <label>Remove</label>
+            </li>
+            <li class="redo d-grid cursor" (click)="addDeletedPoint()">
+                <i class="fa fa-repeat" aria-hidden="true"></i>
+                <label>Restore</label>
+            </li>
+            <li class="save d-grid cursor" data-toggle="modal" data-target="#StoreuserPoints" [ngClass]="{'disabled': !UserDrawtype}">
+                <i class="fa fa-floppy-o" aria-hidden="true"></i>
+                <label>Save</label>
+            </li>
+            <li class="save-measure d-grid cursor" data-toggle="modal" data-target="#allMeasure">
+                <i class="fa fa-file-o" aria-hidden="true"></i>
+                <label>Saved Measure</label>
+            </li>
+            <li class="save d-grid cursor" data-toggle="modal" data-target="#helpview">
+                <i class="fa fa-info" aria-hidden="true"></i>
+                <label>Help</label>
+            </li>
+            <li class="kml d-grid cursor" data-toggle="modal" data-target="#upload">
+                <i class="fa fa-file-code-o" aria-hidden="true"></i>
+                <label>Import KMl</label>
+            </li>
+            <li class="save d-grid cursor" data-toggle="modal" data-target="#setting">
+                <i class="fa fa-cogs" aria-hidden="true"></i>
+                <label>Setting</label>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="row">
+    <div class="freehanderase">
+        <button class="btn" (click)="erasemeasure()">ERASE</button>
+    </div>
+</div>
+<!-- <div class="row storedata">
+    <div class="btn">
+        <button class="zoom-fab zoom-btn-large" id="zoomBtn" data-toggle="modal" data-target="#StoreuserPoints"><span class="rotate-reset">+</span></button>
+    </div>
+</div> -->
+<!-- <div id="menu" class="zoom">
+    <ul class="zoom-menu">
+        <li class="zoom-btn-sm scale-transition scale-out" data-toggle="modal" data-target="#distance"><button class="subbtn">Distance</button>   <img src="assets/icons/ic_action_distance.png" class="zoom-fab submenu"/></li>
+        <li class="zoom-btn-sm scale-transition scale-out" data-toggle="modal" data-target="#area"><button class="subbtn">Area</button>   <img src="assets/icons/ic_action_area.png" class="zoom-fab submenu" /></li>
+        <li class="zoom-btn-sm scale-transition scale-out" data-toggle="modal" data-target="#poi"><button class="subbtn">Poi</button>   <img src="assets/icons/ic_action_poi.png" class="zoom-fab submenu" /></li>
+    </ul>
+    <div class="btn" >
+        <button class="zoom-fab zoom-btn-large" id="zoomBtn" (click)="view()"><span class="rotate-reset">+</span></button>
+    </div>
+</div> -->
+<div class="modal loginmodal" id="login" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" (click)="newmodal()" data-dismiss="modal">&times;</button>                   
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2>Geomeasure</h2>
+                    </div>
+                </div>
+                <div id="userlogin">
+                    <form id="userloginform">
+                        <div class="msg">
+                            <div class="col-md-8 offset-md-2">
+                                <div id="mesg">{{errMsg}}</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8 offset-md-2">
+                                <div class="group">
+                                    <input type="email" name="loginemail" autocomplete="off"><span></span>
+                                    <label>E-mail</label>
+                                    <small class="text-danger">{{loginemail}}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8 offset-md-2">
+                                <div class="group">
+                                    <input type="password" name="loginpassword" autocomplete="off"><span></span>
+                                    <label>Password</label>
+                                    <small class="text-danger">{{loginpassword}}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8 offset-md-2">
+                                <div class="log">
+                                    <button type="button" class="btn btn-primary" (click)="userlogin()">Login</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row">
+                        <div class="col-md-8 offset-md-2 fpassword">
+                            <span class="cursor" (click)="Registerlogin(2)">Forgot Password?</span>                                
+                        </div>
+                    </div>
+                    <!-- <div class="row">
+                        <div class="col-md-8 offset-md-2">
+                            <div class="line l"></div><span class="division">Log In With</span><div class="line r"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8 offset-md-2 default">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn facebook-button" data-dismiss="modal" (click)="socialSignIn('facebook')">Facebook</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn google-button" data-dismiss="modal" (click)="socialSignIn('google')">Google <div class="plus">+</div></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div><hr> -->
+                    <div class="row">
+                        <div class="col-md-10 offset-md-1">
+                            <span class="reg">Don't have a account? <a (click)="Registerlogin(0)"><u>Register now.</u></a></span>
+                        </div>
+                    </div>
+                </div>
+                <div id="userregister">
+                    <form id="userregisterform">
+                        <div class="msg">
+                            <div class="col-md-8 offset-md-2">
+                                <div id="regErr">{{sucMsg}}</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8 offset-md-2">
+                                <div class="group">
+                                    <input type="text" name="regfirstname" autocomplete="off"><span class="highlight"></span><span class="bar"></span>
+                                    <label>Firstname</label>
+                                    <small class="text-danger">{{regfirstname}}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8 offset-md-2">
+                                <div class="group">
+                                    <input type="text" name="reglastname" autocomplete="off"><span class="highlight"></span><span class="bar"></span>
+                                    <label>Lastname</label>
+                                    <small class="text-danger">{{reglastname}}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8 offset-md-2">
+                                <div class="group">
+                                    <input type="email" name="regemail" autocomplete="off"><span class="highlight"></span><span class="bar"></span>
+                                    <label>E-mail</label>
+                                    <small class="text-danger">{{regemail}}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8 offset-md-2">
+                                <div class="group">
+                                    <input type="password" name="regpassword" autocomplete="off"><span class="highlight"></span><span class="bar"></span>
+                                    <label>Password</label>
+                                    <small class="text-danger">{{regpassword}}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8 offset-md-2">
+                                <div class="log">
+                                    <button type="button" class="btn btn-primary" (click)="userregister()">Register</button>
+                                </div>
+                            </div>
+                        </div><hr>
+                        <div class="row">
+                            <div class="col-md-8 offset-md-2">
+                                <span class="reg">Already hava an account!!<a (click)="Registerlogin(1)"><u> Log in.</u></a></span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div id="forgot">
+                    <form id="forgotform">
+                        <div class="msg">
+                            <div class="col-md-8 offset-md-2">
+                                <div id="forErr">{{forMsg}}</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8 offset-md-2">
+                                    <div class="group">
+                                        <input type="email" name="femail" autocomplete="off"><span class="highlight"></span><span class="bar"></span>
+                                        <label>E-mail</label>
+                                        <small class="text-danger">{{forgotemail}}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8 offset-md-2">
+                                    <div class="log">
+                                        <button type="button" class="btn btn-primary" (click)="forgot()">Reset Password</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="upload">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">View KML File</h4>
+            <button type="button" class="close" (click)="clearFile()" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="uploadfile">
+                <div class="row">
+                    <div class="col-md-1">
+                        <input type="radio" name="kmlupload" value="url" checked>
+                    </div>
+                    <div class="col-md-11">
+                        <div class="form-group">
+                            <input type="text" id="url" name="url" class="form-control" placeholder="Enter file url" pattern="^(http|https|ftp):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$">
+                            <small class="text-danger">{{uriErr}}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="line l"></div><span class="division"> OR </span><div class="line r"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-1">
+                        <input type="radio" name="kmlupload" value="file">
+                    </div>
+                    <div class="col-md-11">
+                        <div class="group">
+                            <input type="file" name="upload" accept=".kml" (change)="onFileChange($event)">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-11  offset-1 typeER">
+                        <small class="text-danger">{{typeErr}}</small>
+                    </div>
+                </div>
+                <div class="row draw-action mt-3">
+                    <div class="col-6 p-0">
+                        <div class="btn-action cursor" (click)="viewKml()">
+                            <span>Open</span>
+                        </div>                               
+                    </div>
+                    <div class="col-6 verticalLine p-0">
+                        <div  class="btn-action cursor" data-dismiss="modal" (click)="clearFile()">
+                            <span>Cancel</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="Savemeasurement">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">Save measurement</h4>
+        </div>
+        <div class="modal-body">
+            <form id="storepointform">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="group">
+                            <input type="text" name="filename"><span class="highlight"></span><span class="bar"></span>
+                            <label>File name</label>
+                            <small class="text-danger">{{fileerr}}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row store-action mt-3">
+                    <div class="col-6 p-0">
+                        <div class="btn-action cursor" (click)="storePoints()">
+                            <span>Save</span>
+                        </div>                               
+                    </div>
+                    <div class="col-6 verticalLine p-0">
+                        <div class="btn-action cursor" data-dismiss="modal"  (click)="Cancel()">
+                            <span>Cancel</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="StoreuserPoints">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h6 class="modal-title">Would you like to save measurement ?</h6>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <span>Touch on map to continue with current measurement.</span>
+                </div>
+            </div>
+            <div class="row store-action mt-3">
+                <div class="col-6 p-0">
+                    <div class="btn-action cursor" (click)="cleanMap()" data-dismiss="modal">
+                        <span >Clear</span>
+                    </div>
+                </div>
+                <div class="col-6 verticalLine p-0">
+                    <div class="btn-action cursor" data-dismiss="modal" (click)="storepointfunc()">
+                        <span>Save</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="distance" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Select Measurement Mode</h5>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="select-action"  (click)="drawdistance()" data-dismiss="modal" class="cursor">
+                        <span>Manual Measurement</span>
+                    </div>
+                </div>
+            </div><hr>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="select-action" id="FreehnadPolyline" data-dismiss="modal" class="cursor">
+                        <span>Free Hand Measurement</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="area" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Select Measurement Mode</h5>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="select-action" (click)="drawarea()" data-dismiss="modal" class="cursor">
+                        <span>Manual Measurement</span>
+                    </div>
+                </div>
+            </div><hr>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="select-action" id="FreehnadPolygon" data-dismiss="modal" class="cursor">
+                        <span>Free Hand Measurement</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="poi" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Enter Coordinate</h5>
+            <button type="button" class="close" (click)="hide()" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <span (click)="poi()" class="cursor">Latitude / Longitude</span>
+                    <div class="col-md-10 offset-md-1">
+                        <div class="drawpoi">
+                            <form id="latlngForm" class="form-horizontal">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <input type="text" name="latitude" class="form-control float" placeholder="Enter Latitude">
+                                        <small class="text-danger">{{latitude}}</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="text" name="longitude" class="form-control float" placeholder="Enter Longitude">
+                                        <small class="text-danger">{{longitude}}</small>
+                                    </div>
+                                </div>                                       
+                                <div class="row">
+                                    <span><button type="button" id="savelocation" class="btn btn-primary" (click)="userCursor()">Get Location</button></span>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div><hr>
+            <div class="row">
+                <div class="col-md-12">
+                    <span (click)="degree()" class="cursor">Degree (DMS)</span>
+                    <div class="col-md-10 offset-md-1">
+                        <div class="degreeDraw">
+                            <form id="location" class="form-horizontal">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <input type="text" name="degree" class="form-control degree" placeholder="D">
+                                        <small class="text-danger">{{locationdegree}}</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" name="minute" class="form-control number" placeholder="Min">
+                                        <small class="text-danger">{{locationminute}}</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" name="second" class="form-control number" placeholder="Sec">
+                                        <small class="text-danger">{{locationsecond}}</small>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select id="dropdown1" class="form-control drop">
+                                            <option value="N" selected>N</option>
+                                            <option value="S">S</option>
+                                        </select>
+                                    </div>                   
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <input type="text" name="degree1" class="form-control degree" placeholder="D">
+                                        <small class="text-danger">{{locationdegree1}}</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" name="minute1" class="form-control number" placeholder="Min">
+                                        <small class="text-danger">{{locationminute1}}</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" name="second1" class="form-control number" placeholder="Sec">
+                                        <small  class="text-danger">{{locationsecond1}}</small>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select id="dropdown2" class="form-control drop">
+                                            <option value="E" selected>E</option>
+                                            <option value="W">W</option>
+                                        </select>
+                                    </div>                   
+                                </div>
+                                <div class="row">
+                                    <span><button type="button" id="savegetlocation" class="btn btn-primary" (click)="getLocation()">Get Location</button></span>
+                                </div>   
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div><hr>
+            <div class="row">
+                <div class="col-12">
+                    <span (click)="getLcoationinfo()" class="cursor">Lcoation Info (Touch on map)</span>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="allMeasure" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Your saved Areas / Distances</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <header>
+                    <div id="material-tabs">
+                        <a id="tab1-tab" href="#tab1" class="active">Area</a>
+                        <a id="tab2-tab" href="#tab2" class="verticalLine">Distance</a>
+                        <span class="yellow-bar"></span>
+                    </div>
+                </header>
+                <div class="tab-content">
+                    <div id="tab1">
+                        <div *ngIf="EmptyArea !== ''">
+                            <li class="emptyfile">
+                                <span class="item">
+                                    <span class="item-center">{{EmptyArea}}</span>
+                                </span>
+                            </li>
+                        </div>
+                        <div *ngIf="EmptyArea === ''">
+                            <div *ngFor="let file of userAllFile">
+                                <li *ngIf="file.type === 'polygon'" class="list-menu">
+                                    <span class="item">
+                                        <span class="item-left">
+                                            <span class="over">{{file.name}}</span>
+                                        </span>
+                                        <span class="item-right">
+                                            <button class="btn btn-primary fa fa-eye" (click)="fileView(file)"></button>
+                                            <button class="btn btn-primary fa fa-download" (click)="fileDownload(file)"></button>
+                                        </span>
+                                    </span>
+                                </li>
+                            </div>
+                        </div>	
+                    </div>
+                    <div id="tab2">
+                        <div *ngIf="EmptyDist !== ''">
+                            <li class="emptyfile ">
+                                <span class="item">
+                                    <span class="item-center">{{EmptyDist}}</span>
+                                </span>
+                            </li>
+                        </div>
+                        <div *ngIf="EmptyDist === ''">
+                            <div *ngFor="let file of userAllFile" >
+                                <li *ngIf="file.type === 'polyline'" class="list-menu">
+                                    <span class="item">
+                                        <span class="item-left">
+                                            <span class="over">{{file.name}}</span>
+                                        </span>
+                                        <span class="item-right">
+                                            <button class="btn btn-primary fa fa-eye" (click)="fileView(file)"></button>
+                                            <button class="btn btn-primary fa fa-download" (click)="fileDownload(file)"></button>
+                                        </span>
+                                    </span>
+                                </li>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="setting" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center">Settings</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <span class="fa fa-question-circle" data-toggle="modal" data-target="#helpview"> Show Turorial</span>
+                    </div>
+                </div>
+                <div class="row mt-1">
+                    <div class="col-md-12">
+                        <span class="fa fa-list-ul"> Measurement Unit</span>
+                    </div>
+                </div>
+                <div class="row sselect">
+                    <div class="col-6 cursor" data-toggle="modal" data-target="#selctdistance">
+                        <span>Distance</span>
+                        <i class="fa fa-angle-down down-arrow" aria-hidden="true"></i>
+                    </div>
+                    <div class="col-6 cursor" data-toggle="modal" data-target="#selctarea">
+                        <span>Area</span>
+                        <i class="fa fa-angle-down down-arrow" aria-hidden="true"></i>
+                    </div>
+                </div>
+                <div class="row mt-1">
+                    <div class="col-md-12">
+                        <span class="fa fa-users"> Follow us</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul class="social">
+                            <li><a href="https://www.facebook.com/geomeasure/" target="_blank"><i class="fa fa-facebook-square"></i></a></li>
+                            <li><a href="https://twitter.com/areacal" target="_blank"><i class="fa fa-twitter-square"></i></a></li>
+                            <li><a href="https://plus.google.com/105577101249043923888" target="_blank"><i class="fa fa-google-plus-square"></i></a></li>
+                            <li><a href="https://www.pinterest.com/measurearea/" target="_blank"><i class="fa fa-pinterest-square"></i></a></li>
+                            <li><a href="https://www.instagram.com/geomeasureareacalc/" target="_blank"><i class="fa fa-instagram"></i></a></li>
+                            <li><a href="https://www.youtube.com/watch?v=OiSSsiTeTkA" target="_blank"><i class="fa fa-youtube-play"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+</div>
+<div class="modal" id="selctdistance" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title text-center">Select Measurement Type</h5>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Kilometer</label><input type="checkbox" value="Kilometer" name="distance[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Meter</label><input type="checkbox" value="Meter" name="distance[]" checked/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Centimeter</label><input type="checkbox" value="Centimeter" name="distance[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Milimeter</label><input type="checkbox" value="Milimeter" name="distance[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Micrometer</label><input type="checkbox" value="Micrometer" name="distance[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Nanometer</label><input type="checkbox" value="Nanometer" name="distance[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Miles</label><input type="checkbox" value="Miles" name="distance[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Yard</label><input type="checkbox" value="Yard" name="distance[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Feet</label><input type="checkbox" value="Feet" name="distance[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Inch</label><input type="checkbox" value="Inch" name="distance[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Nauticalmeter</label><input type="checkbox" value="Nauticalmeter" name="distance[]" />
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="selctarea" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title text-center">Select Measurement Type</h5>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Square kilometer</label><input type="checkbox" value="skilometer" name="area[]"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Square meter</label><input type="checkbox" value="smeter" name="area[]" checked/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Square miles</label><input type="checkbox" value="smiles" name="area[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Square yard</label><input type="checkbox" value="syard" name="area[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Square feet</label><input type="checkbox" value="sfeet" name="area[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Square inch</label><input type="checkbox" value="sinch" name="area[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Hectare</label><input type="checkbox" value="hectare" name="area[]" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Acre</label><input type="checkbox" value="acre" name="area[]" />
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="helpview" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title text-center">Help</h5>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+            <div class="modal-body">
+                <iframe width="100%" height="315"  src="http://www.geomeasure.in/how-to-use-geo-measure-area-calculator.php" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="RedrawConfirmModal" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title"></h6>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <span>Are you sure to delete points and redraw?</span>
+                    </div>
+                </div>
+                <div class="row draw-action mt-3">
+                    <div class="col-6 p-0">
+                        <div class="btn-action cursor" data-dismiss="modal">
+                            <span >Cancel</span>
+                        </div>
+                    </div>
+                    <div class="col-6 verticalLine p-0">
+                        <div class="btn-action cursor" data-dismiss="modal" (click)="ClearandRedraw()">
+                            <span>Redraw</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="verifyotp" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center">Verify OTP</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-8 offset-2">
+                        <input type="text" name="verify" class="form-control otp-verify" maxlength="6">
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6 offset-md-3">
+                        <div class="log">
+                            <button type="button" class="btn btn-primary" (click)="verifyOtp()">Verify OTP</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
