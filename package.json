@@ -1,10 +1,15 @@
 {
-  "name": "Geomeasure",
+  "name": "geomeasure-desktop",
   "main": "main.js",
-  "version": "1.0.0",
-  "author": "Bmac Infotech",
+  "version": "0.8.1",
+  "author": {
+    "name" : 
+     "Bmac Infotech",
+     "email": "rax.jethva@gmail.com"
+  },
   "description": "Geomeasure measure your fields",
   "license": "MIT",
+  "homepage": "https://geomeasure.in",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -13,7 +18,13 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "dist": "electron-builder",
-    "electron": "ng build  && electron ."
+    "electron": "ng build  && electron .",
+    "publishwin": "build  --win --x64 -p always",
+    "publishdeb": "build  --deb --x64 -p always",
+    "publishmac": "electron-builder  --mac --x64 -p always",
+    "macbuild": "electron-builder  --mac --x64 ",
+    "winbuild": "electron-builder  --win --x64",
+    "linuxbuild": "electron-builder  --linux deb --x64"
   },
   "private": true,
   "dependencies": {
@@ -29,8 +40,10 @@
     "@types/file-saver": "^1.3.0",
     "@types/googlemaps": "^3.30.9",
     "@types/leaflet": "^1.2.7",
-    "angular5-social-login": "^1.0.9",
+    "alert-node": "^1.2.5",
     "core-js": "^2.4.1",
+    "electron-log": "^1.3.0",
+    "electron-updater": "^4.0.6",
     "file-saver": "^1.3.8",
     "leaflet": "^1.3.1",
     "ng2-adsense": "^5.3.1",
@@ -50,8 +63,8 @@
     "@types/node": "~6.0.60",
     "buffer": "^5.2.0",
     "codelyzer": "^4.0.1",
-    "electron": "^2.0.5",
-    "electron-builder": "^20.28.1",
+    "electron": "^3.0.2",
+    "electron-builder": "^20.28.4",
     "electron-packager": "^12.1.0",
     "gulp-electron": "^0.1.3",
     "gulp-install": "^1.1.0",
@@ -68,38 +81,33 @@
     "typescript": "~2.5.3"
   },
   "build": {
-    "appId": "com.bmacinfotech.geomeasure",
-    "productName": "Geomeasure",
+    "appId": "com.bmac.test",
+    "productName": "geomeasure-desktop",
+    "icon": "appIcon/logo_gmcav2trans.icns",
     "directories": {
       "output": "packaged"
     },
-    "mac": {
-      "target": [
-        "dmg"
-      ],
-      "identity": null,
-      "icon": "appIcon/logo_gmcav2trans.icns",
-      "category": "public.app-category.utilities"
+    "linux":{
+      "icon":"appIcon/logo_gmcav2trans.png"
     },
-    "dmg": {
-      "icon": "appIcon/logo_gmcav2trans.icns",
-      "iconSize": 100,
-      "window": {
-        "width": 544,
-        "height": 408
-      },
-      "contents": [
+    "win": {
+      "target": [
         {
-          "x": 145,
-          "y": 257
-        },
-        {
-          "x": 400,
-          "y": 255,
-          "type": "link",
-          "path": "/Applications"
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
         }
-      ]
-    }
+      ],
+      "icon": "appIcon/logo_gmcav2trans_UqB_icon.ico"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "raxjethvaa",
+        "repo": "geomeasure-desktop"
+      }
+    ]
   }
 }

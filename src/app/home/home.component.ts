@@ -1,12 +1,13 @@
 import { Component, OnInit, NgZone, Self, SkipSelf } from '@angular/core';
-import{ Http , Response} from '@angular/http';
+import { HttpService } from '../helper/http-service';
 import { FormControl, FormGroup, NgForm, FormBuilder ,Validators} from '@angular/forms';
-import { AuthService,FacebookLoginProvider,GoogleLoginProvider } from 'angular5-social-login';
+// import { AuthService,FacebookLoginProvider,GoogleLoginProvider } from 'angular5-social-login';
 import * as tokml from 'tokml';
 import {saveAs as importedSaveAs} from "file-saver";
 import {PlatformLocation } from '@angular/common';
 import { DeleteMenu } from '../helper/vertaxmenu';
 import 'rxjs/add/operator/toPromise';
+import { environment } from './../../environments/environment';
 // import {} from '@types/googlemaps';
 declare var $: any;
 declare var geoXML3:any;
@@ -102,8 +103,8 @@ export class HomeComponent implements OnInit {
   constructor(
     private _ngzone:NgZone,
     public platformLocation: PlatformLocation,
-    private socialAuthService: AuthService,
-    private http:Http) {
+    // private socialAuthService: AuthService,
+    private http: HttpService) {
       const self = this;
       window.closeinfowindow = function() {
         self.markerconfirmwindow.close()
@@ -1312,18 +1313,22 @@ export class HomeComponent implements OnInit {
     if(email && password) {
       var re = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}/igm;
       if (re.test(email)) {
-        var login = "http://192.168.0.9/laravelstructure/public/api/login";
-        var Loginform = new FormData;
-        Loginform .append('email', email);
-        Loginform .append('password', password);
-        Loginform .append('responsetype', 'gzip');
-        self.http.post(login,Loginform).subscribe((response: any)=>{
-          let b64Data = response.text();
-          let strData = atob(b64Data);
-          var charData = strData.split('').map(function(x){return x.charCodeAt(0);});
-          var binData = new Uint8Array(charData);
-          var data = pako.inflate(binData);
-          var userdata = JSON.parse(String.fromCharCode.apply(null, new Uint16Array(data)));
+        var login = environment.mainUrl + "/login";
+        var Loginform: any = {};
+        Loginform['email'] = email;
+        Loginform['password'] =  password;
+        Loginform['responsetype'] = 'gzip';
+        const header =  {};
+        header['Content-Type'] = 'application/json';
+   
+        self.http.post(login,header,Loginform).then((response: any)=>{
+          // let b64Data = response.text();
+          // let strData = atob(b64Data);
+          // var charData = strData.split('').map(function(x){return x.charCodeAt(0);});
+          // var binData = new Uint8Array(charData);
+          // var data = pako.inflate(binData);
+          // var userdata = JSON.parse(String.fromCharCode.apply(null, new Uint16Array(data)));
+          var userdata = (response);
           if(userdata.success === true) {
             $('#login').modal('hide'); 
             localStorage.setItem('logintoken', userdata.data.token);
@@ -1359,28 +1364,31 @@ export class HomeComponent implements OnInit {
       self.loginpassword = 'Password is required.';
     }
   }
-  userregister(){
+  userregister() {
     const self = this;
     let firstname = $("input[name='regfirstname']").val();
     let lastname= $("input[name='reglastname']").val();
     let email = $("input[name='regemail']").val();
     let password = $("input[name='regpassword']").val();
     if(firstname && lastname && email && password) {
-      var re = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}/igm;
+      const re = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}/igm;
       if (re.test(email)) {
-        var register = "http://192.168.0.9/laravelstructure/public/api/register";
-        const regForm = new FormData;
-        regForm.append('name', firstname+" "+lastname);
-        regForm.append('email', email);
-        regForm.append('password', password);
-        regForm .append('responsetype', 'gzip');
-        self.http.post(register,regForm).subscribe((response: any) => {
-          let b64Data = response.text();
-          let strData = atob(b64Data);
-          var charData = strData.split('').map(function(x){return x.charCodeAt(0);});
-          var binData = new Uint8Array(charData);
-          var data = pako.inflate(binData);
-          var res = JSON.parse(String.fromCharCode.apply(null, new Uint16Array(data)));
+        const register = environment.mainUrl + "/register";
+        const regForm: any = {};
+        regForm['email'] = email;
+        regForm['password'] =  password;
+        regForm['name'] =  name;
+        regForm['responsetype'] = 'gzip';
+        const header =  {};
+        header['Content-Type'] = 'application/json';
+        self.http.post(register,header, regForm).then((response: any) => {
+          // let b64Data = response.text();
+          // let strData = atob(b64Data);
+          // var charData = strData.split('').map(function(x){return x.charCodeAt(0);});
+          // var binData = new Uint8Array(charData);
+          // var data = pako.inflate(binData);
+          // var res = JSON.parse(String.fromCharCode.apply(null, new Uint16Array(data)));
+          var res = (response);
           if(res.success === false) {
             this.sucMsg = res.message;
             $('#regErr').addClass('message alert-warning');
@@ -1401,9 +1409,13 @@ export class HomeComponent implements OnInit {
             setTimeout(function(){
               temp.sucMsg = '';
               $('#regErr').removeClass('message alert-success');
-              $('#login').modal('hide'); 
+              $('#login').modal('hide');
             },1500);
           }
+        },(error) => {
+          console.log('error - register');
+          console.log(error);
+          console.log('error - register');
         });
       } else {
         if(!re.test(email)) {
@@ -1413,7 +1425,7 @@ export class HomeComponent implements OnInit {
         }
       }
     } else {
-      if(!firstname) { self.regfirstname = 'Firstname is required.'; } else { self.regfirstname = ''; } 
+      if(!firstname) { self.regfirstname = 'Firstname is required.'; } else { self.regfirstname = ''; }
       if(!lastname) { self.reglastname = 'Lastname is required.'; } else { self.reglastname = ''; } 
       if(!password) { self.regpassword = 'Password is required.'; } else { self.regpassword = ''; }
       if(email) { 
@@ -1434,18 +1446,24 @@ export class HomeComponent implements OnInit {
     if(email) {
       var re = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}/igm;
       if(re.test(email)) {
-        var forgotUrl ="http://192.168.0.9/laravelstructure/public/api/forgotpassword";
-        var resetForm = new FormData;
-        resetForm.append('email', email);
-        resetForm .append('responsetype', 'gzip');
-        this.http.post(forgotUrl,resetForm).subscribe((response: any)=>{
-          let b64Data = response.text();
+  
+
+        const forgotUrl = environment.mainUrl + "/forgotpassword";
+        const resetForm: any = {};
+        resetForm['email'] = email;
+        
+        resetForm['responsetype'] = 'gzip';
+        const header =  {};
+        header['Content-Type'] = 'application/json';
+        this.http.post(forgotUrl, header ,resetForm).then((response: any)=>{
+        /*  let b64Data = response.text();
           let strData = atob(b64Data);
           var charData = strData.split('').map(function(x){return x.charCodeAt(0);});
           var binData = new Uint8Array(charData);
           var data = pako.inflate(binData);
-          var forgotdata = JSON.parse(String.fromCharCode.apply(null, new Uint16Array(data)));
-          if(forgotdata.success === true){
+          var forgotdata = JSON.parse(String.fromCharCode.apply(null, new Uint16Array(data))); */
+          var forgotdata = (response);
+          if(forgotdata.success === true) {
             $('#forgotform').trigger('reset');
             $('input[name="femail"]').removeClass('used');
             $('#forErr').addClass('message alert-success');
@@ -1458,7 +1476,7 @@ export class HomeComponent implements OnInit {
               $('#forErr').removeClass('forErr');
             },1500);
           }
-          if(forgotdata.success === false){
+          if(forgotdata.success === false) {
             this.forMsg = forgotdata.message;
             $('#forErr').addClass('message alert-warning');
             var temp = this;
@@ -1481,14 +1499,14 @@ export class HomeComponent implements OnInit {
     console.log(otp);
   }
   socialSignIn(socialPlatform : string) {
-    let socialPlatformProvider;
+      /* let socialPlatformProvider;
     let self = this;
     if(socialPlatform === "facebook"){
       socialPlatformProvider = FacebookLoginProvider.PROVIDER_ID;
     }else if(socialPlatform === "google"){
       socialPlatformProvider = GoogleLoginProvider.PROVIDER_ID;
     }
-    this.socialAuthService.signIn(socialPlatformProvider).then(
+ this.socialAuthService.signIn(socialPlatformProvider).then(
       (userData) => {
         var regUrl = "http://geomeasure.in/apiv3/api/register";
         if(socialPlatform === "facebook"){
@@ -1519,7 +1537,7 @@ export class HomeComponent implements OnInit {
           });
         }
       }
-    );
+    ); */
   }
   logout(){
     var self = this;

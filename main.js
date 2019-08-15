@@ -3,10 +3,10 @@ const {
   app,
   BrowserWindow,net,Menu, protocol, ipcMain
 } = require('electron')
-// const alert = require('alert-node');
+const alert = require('alert-node');
 
-
- // const { autoUpdater } = require("electron-updater")
+const log = require('electron-log');
+  const { autoUpdater } = require("electron-updater")
 const path = require('path')
 const url = require('url')
 
@@ -33,7 +33,15 @@ let template = []
 //}
 
 let win;
+autoUpdater.logger = log;
+autoUpdater.logger.transports.file.level = 'info';
+log.info('App starting...');
+function sendStatusToWindow(text) {
+ // alert(text);
+  log.info(text);
+  win.webContents.send('message', text);
 
+}
 
 function createWindow() {
   win = new BrowserWindow({
@@ -56,11 +64,42 @@ function createWindow() {
   }))
 
   // Open the DevTools optionally:
-  // win.webContents.openDevTools();
+ // win.webContents.openDevTools();
   return win;
 }
 
-
+ipcMain.on('asynchronous-message', (event, arg) => {
+  app.relaunch();
+  app.exit(0);
+  })
+  
+  try{
+   // autoupdater.fire('check');
+    autoUpdater.on('checking-for-update', () => {
+      sendStatusToWindow('Checking for update...');
+    })
+    autoUpdater.on('update-available', (info) => {
+      sendStatusToWindow('update-available');
+    })
+    autoUpdater.on('update-not-available', (info) => {
+      sendStatusToWindow('update-not-available');
+    })
+    autoUpdater.on('error', (err) => {
+      sendStatusToWindow('Error' +err);
+    })
+    autoUpdater.on('download-progress', (progressObj) => {
+      //let log_message = "Download speed: " + progressObj.bytesPerSecond;
+      //log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+      //log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+      sendStatusToWindow('downloading----->'+progressObj.percent);
+    })
+    autoUpdater.on('update-downloaded', (info) => {
+      sendStatusToWindow('update-downloaded');
+    });
+  
+  }catch(e){
+    sendStatusToWindow('Error' + e);
+  }
 
 app.on('ready', function() {
 try{
@@ -68,6 +107,8 @@ try{
   Menu.setApplicationMenu(menu);
   //alert("Hlbefore"+Math.random())
   createWindow();
+  autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.checkForUpdates();
   
 }catch(e){
 //   alert(e);
